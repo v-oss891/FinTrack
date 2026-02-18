@@ -1,19 +1,11 @@
-Actors:
-1. User
-2. Admin
+```mermaid
+flowchart TD
+    User --> Register
+    User --> Login
+    User --> AddTransaction
+    User --> SetBudget
+    User --> AddInvestment
+    User --> ViewAnalytics
 
-User Use Cases:
-- Register
-- Login
-- Add Income
-- Add Expense
-- Categorize Transactions
-- Set Monthly Budget
-- View Budget Usage
-- Add Investment
-- Calculate ROI
-- View Financial Analytics
-
-Admin Use Cases:
-- Manage Users
-- Monitor System Activity
+    Admin --> ManageUsers
+```
