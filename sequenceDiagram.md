@@ -1,9 +1,18 @@
-Main Flow: Add Transaction and Update Budget
+# Sequence Diagram – Add Transaction Flow
 
-User → Login
-User → Add Transaction
-System → Validate Input
-System → Store Transaction in Database
-System → Update Monthly Summary
-System → Recalculate Budget Usage
-System → Return Updated Analytics to User
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant Database
+
+    User->>Frontend: Add Transaction Details
+    Frontend->>Backend: POST /transactions
+    Backend->>Backend: Validate Input Data
+    Backend->>Database: Save Transaction
+    Database-->>Backend: Success Response
+    Backend->>Backend: Update Budget & Analytics
+    Backend-->>Frontend: Return Updated Summary
+    Frontend-->>User: Display Updated Dashboard
+```
