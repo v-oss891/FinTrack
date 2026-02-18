@@ -1,44 +1,47 @@
+# Class Diagram – FinTrack System
+
 ```mermaid
 classDiagram
-    class User {
-        int id
-        string name
-        string email
-        string password
-    }
 
-    class Transaction {
-        int id
-        int userId
-        float amount
-        string type
-        string category
-        date date
-    }
+class User {
+    int id
+    string name
+    string email
+    string password
+}
 
-    class Budget {
-        int id
-        int userId
-        string month
-        float limit
-    }
+class Transaction {
+    int id
+    int userId
+    float amount
+    string type
+    string category
+    date date
+}
 
-    class Investment {
-        int id
-        int userId
-        float principal
-        float rate
-        int duration
-    }
+class Budget {
+    int id
+    int userId
+    string month
+    float limit
+}
 
-    class AnalyticsService {
-        +calculateMean()
-        +calculateStandardDeviation()
-        +calculateROI()
-        +calculateCAGR()
-    }
+class Investment {
+    int id
+    int userId
+    float principal
+    float rate
+    int duration
+}
 
-    User "1" --> "*" Transaction
-    User "1" --> "*" Budget
-    User "1" --> "*" Investment
+class AnalyticsService {
+    +calculateMean()
+    +calculateStandardDeviation()
+    +calculateROI()
+    +calculateCAGR()
+}
+
+User "1" --> "*" Transaction
+User "1" --> "*" Budget
+User "1" --> "*" Investment
 ```
