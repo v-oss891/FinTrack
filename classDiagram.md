@@ -1,37 +1,44 @@
-Class: User
-- id
-- name
-- email
-- password
-+ register()
-+ login()
+```mermaid
+classDiagram
+    class User {
+        int id
+        string name
+        string email
+        string password
+    }
 
-Class: Transaction
-- id
-- userId
-- amount
-- type (income/expense)
-- category
-- date
+    class Transaction {
+        int id
+        int userId
+        float amount
+        string type
+        string category
+        date date
+    }
 
-Class: Budget
-- id
-- userId
-- month
-- limit
-+ calculateUsage()
+    class Budget {
+        int id
+        int userId
+        string month
+        float limit
+    }
 
-Class: Investment
-- id
-- userId
-- principal
-- rate
-- duration
-+ calculateROI()
-+ calculateCAGR()
-+ calculateCompoundInterest()
+    class Investment {
+        int id
+        int userId
+        float principal
+        float rate
+        int duration
+    }
 
-Class: AnalyticsService
-+ calculateMean()
-+ calculateStandardDeviation()
-+ calculateSavingsRate()
+    class AnalyticsService {
+        +calculateMean()
+        +calculateStandardDeviation()
+        +calculateROI()
+        +calculateCAGR()
+    }
+
+    User "1" --> "*" Transaction
+    User "1" --> "*" Budget
+    User "1" --> "*" Investment
+```
