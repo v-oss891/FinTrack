@@ -1,34 +1,37 @@
-Entities:
+```mermaid
+erDiagram
+    USER {
+        int id PK
+        string name
+        string email
+        string password
+    }
 
-User
-- id (Primary Key)
-- name
-- email
-- password
+    TRANSACTION {
+        int id PK
+        int user_id FK
+        float amount
+        string type
+        string category
+        date date
+    }
 
-Transaction
-- id (Primary Key)
-- user_id (Foreign Key)
-- amount
-- type
-- category
-- date
+    BUDGET {
+        int id PK
+        int user_id FK
+        string month
+        float limit
+    }
 
-Budget
-- id (Primary Key)
-- user_id (Foreign Key)
-- month
-- limit
+    INVESTMENT {
+        int id PK
+        int user_id FK
+        float principal
+        float rate
+        int duration
+    }
 
-Investment
-- id (Primary Key)
-- user_id (Foreign Key)
-- principal
-- rate
-- duration
-
-Relationships:
-
-User 1 --- * Transaction
-User 1 --- * Budget
-User 1 --- * Investment
+    USER ||--o{ TRANSACTION : has
+    USER ||--o{ BUDGET : sets
+    USER ||--o{ INVESTMENT : owns
+```
