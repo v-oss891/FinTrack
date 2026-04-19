@@ -2,39 +2,39 @@ import apiService from './ApiService';
 import Transaction from '../models/Transaction';
 
 /**
- * Service for managing transactions on the frontend.
+ * Service for managing financial transactions.
  */
 class TransactionService {
-  async getTransactions(params = {}) {
+  public async getTransactions(params: any = {}): Promise<{ transactions: Transaction[], meta: any }> {
     const response = await apiService.get('/transactions', { params });
     return {
-      data: response.data.data.map((t) => new Transaction(t)),
+      transactions: response.data.data.map((t: any) => new Transaction(t)),
       meta: response.data.meta,
     };
   }
 
-  async getTransaction(id) {
+  public async getTransaction(id: string): Promise<Transaction> {
     const response = await apiService.get(`/transactions/${id}`);
     return new Transaction(response.data.data);
   }
 
-  async createTransaction(payload) {
+  public async createTransaction(payload: any): Promise<Transaction> {
     const response = await apiService.post('/transactions', payload);
     return new Transaction(response.data.data);
   }
 
-  async updateTransaction(id, payload) {
+  public async updateTransaction(id: string, payload: any): Promise<Transaction> {
     const response = await apiService.put(`/transactions/${id}`, payload);
     return new Transaction(response.data.data);
   }
 
-  async deleteTransaction(id) {
+  public async deleteTransaction(id: string): Promise<any> {
     return apiService.delete(`/transactions/${id}`);
   }
 
-  getExportUrl(params = {}) {
+  public getExportUrl(params: any = {}): string {
     const query = new URLSearchParams(params).toString();
-    return `${apiService.apiBaseUrl}/transactions/export/csv${query ? `?${query}` : ''}`;
+    return `${apiService.apiBaseUrl}/transactions/export/csv?${query}`;
   }
 }
 
