@@ -86,5 +86,4 @@ This project is configured for **Render**. Pushing to the `main` branch triggers
 2. Builds the React production bundle.
 3. Deploys services to a global CDN/Web service.
 
----
-*Maintained with ❤️ using Antigravity AI.*
+---------
