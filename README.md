@@ -1,132 +1,90 @@
-# FinTrack
+# FinTrack 🚀
 
-FinTrack is a full-stack personal finance tracker built with React, Node.js, Express, MongoDB, and JWT authentication. It includes protected auth flows, transaction CRUD, monthly budgets with alerts, analytics dashboards, CSV export, and basic AI-style spending insights.
+FinTrack is a premium full-stack personal finance tracker refactored into a modern **Object-Oriented Programming (OOP)** architecture using **TypeScript**. It features a clean, layered structure (Controller-Service-Repository) for maximum scalability and maintainability.
 
-## Tech Stack
+## ✨ Features
 
-- Frontend: React, React Router, Axios, Recharts, Framer Motion
-- Backend: Node.js, Express, Mongoose, JWT
-- Database: MongoDB
+- **Auth**: Secure JWT authentication with protected routes and class-based AuthService.
+- **Transactions**: CRUD operations for income/expenses with filtering and CSV export.
+- **Budgets**: Monthly budget management with category-specific logic and over-spending alerts.
+- **Analytics**: Dynamic dashboards using Recharts, showing balances, savings rates, and category insights.
+- **Clean Architecture**: Strictly separated layers to decouple business logic from database and transport protocols.
+- **Premium UI**: Modern, responsive interface built with Framer Motion and custom CSS (Glassmorphism aesthetics).
 
-## Folder Structure
+## 🛠 Tech Stack
+
+- **Frontend**: React (TSX), React Router, Axios, Recharts, Framer Motion, TypeScript.
+- **Backend**: Node.js, Express, Mongoose, JWT, TypeScript.
+- **Database**: MongoDB.
+- **Deployment**: Render (powered by Render Blueprints).
+
+## 📂 Architecture & Folder Structure
+
+We follow a **Controller-Service-Repository** pattern to ensure Single Responsibility and high testability.
 
 ```text
 FinTrack/
 ├── backend/
-│   ├── .env.example
-│   ├── package.json
-│   └── src/
-│       ├── app.js
-│       ├── server.js
-│       ├── config/
-│       ├── constants/
-│       ├── controllers/
-│       ├── middleware/
-│       ├── models/
-│       ├── routes/
-│       ├── services/
-│       └── utils/
+│   ├── src/
+│   │   ├── controllers/      # Request handlers (Class-based)
+│   │   ├── services/         # Business logic (Class-based)
+│   │   ├── repositories/     # Database abstractions (NEW)
+│   │   ├── models/           # Mongoose TS schemas
+│   │   ├── routes/           # Express route definitions
+│   │   ├── middleware/       # Auth & Error handling
+│   │   ├── app.ts            # App configuration
+│   │   └── server.ts         # Entry point
+│   └── tsconfig.json
 ├── frontend/
-│   ├── .env.example
-│   ├── package.json
-│   ├── public/
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── providers/
-│       ├── api.js
-│       ├── constants.js
-│       ├── styles.css
-│       └── utils.js
-└── README.md
+│   ├── src/
+│   │   ├── models/           # Data models (Transaction/Budget classes)
+│   │   ├── services/         # API Service layer (Class-based)
+│   │   ├── providers/        # Auth context (Typed)
+│   │   ├── components/       # Functional UI components
+│   │   └── pages/            # View logic
+│   └── tsconfig.json
+└── render.yaml               # Deployment blueprint
 ```
 
-## Backend API
+## 🚀 Getting Started
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET /api/users/me`
-- `GET /api/users/dashboard?month=YYYY-MM`
-- `GET /api/users/analytics?year=YYYY`
-- `GET /api/users/insights?month=YYYY-MM`
-- `GET /api/transactions`
-- `POST /api/transactions`
-- `PUT /api/transactions/:id`
-- `DELETE /api/transactions/:id`
-- `GET /api/transactions/export/csv`
-- `GET /api/budgets`
-- `POST /api/budgets`
-- `PUT /api/budgets/:id`
-- `DELETE /api/budgets/:id`
-- `GET /api/budgets/summary?month=YYYY-MM`
+### 1. Prerequisites
+- Node.js (v16+)
+- MongoDB (Local or Atlas)
+- npm or yarn
 
-## Database Models
-
-### User
-- `name`
-- `email`
-- `password`
-
-### Transaction
-- `user`
-- `title`
-- `amount`
-- `type`
-- `category`
-- `paymentMethod`
-- `notes`
-- `date`
-
-### Budget
-- `user`
-- `month`
-- `category`
-- `amount`
-- `alertThreshold`
-
-## Setup
-
-### 1. Backend
-
+### 2. Backend Setup
 ```bash
-cd /Users/vanshjain/Documents/SESD/FinTrack/backend
-cp .env.example .env
+cd backend
 npm install
-npm run dev
+# Configure your .env with MONGODB_URI and JWT_SECRET
+npm run build   # Compiles TS to JS
+npm run dev     # Starts with ts-node for development
 ```
 
-Set `MONGODB_URI` in `.env` to either:
-
-- `mongodb://127.0.0.1:27017/fintrack`
-- or your MongoDB Atlas connection string
-
-### 2. Frontend
-
+### 3. Frontend Setup
 ```bash
-cd /Users/vanshjain/Documents/SESD/FinTrack/frontend
-cp .env.example .env
+cd frontend
 npm install
-npm start
+npm start       # Starts React development server
 ```
 
-## Run Locally
+## 📡 API Reference
 
-1. Start MongoDB locally or use MongoDB Atlas.
-2. Start the backend on `http://localhost:8000`.
-3. Start the frontend on `http://localhost:3000`.
-4. Register a new account and begin adding transactions and budgets.
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Register new user |
+| `POST` | `/api/auth/login` | Authenticate and get token |
+| `GET` | `/api/users/dashboard` | Get financial summary & insights |
+| `GET` | `/api/transactions` | List/Filter transactions |
+| `POST` | `/api/transactions` | Create a new transaction |
+| `GET` | `/api/budgets/summary` | Get monthly budget progress |
 
-## Features
+## 📦 Deployment
+This project is configured for **Render**. Pushing to the `main` branch triggers the `render.yaml` blueprint, which automatically:
+1. Builds the TypeScript backend.
+2. Builds the React production bundle.
+3. Deploys services to a global CDN/Web service.
 
-- JWT authentication with protected routes
-- Dashboard with total balance, monthly income, monthly expenses, savings, recent activity, and alerts
-- Transaction add, edit, delete, filter, and CSV export
-- Monthly budgets with threshold warnings and over-budget alerts
-- Analytics charts for monthly performance and category-wise spending
-- Basic AI-style insight generation from spending behavior
-
-## Notes
-
-- The old mixed Postgres/in-memory implementation has been replaced with a MongoDB-based architecture.
-- Environment variables are required before starting the backend.
+---
+*Maintained with ❤️ using Antigravity AI.*
