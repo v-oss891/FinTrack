@@ -1,18 +1,19 @@
-const budgetRepository = require('../repositories/BudgetRepository');
-const AppError = require('../utils/AppError');
-const { validateMonth } = require('../utils/validators');
+import budgetRepository from '../repositories/BudgetRepository';
+import AppError from '../utils/AppError';
+import { validateMonth } from '../utils/validators';
 
 /**
  * Service for managing budget-related business logic.
- * Delegating DB operations to BudgetRepository.
  */
 class BudgetService {
-  constructor(budgetRepository) {
-    this.budgetRepository = budgetRepository;
+  private budgetRepository;
+
+  constructor(budgetRepo: any) {
+    this.budgetRepository = budgetRepo;
   }
 
-  async listBudgets(userId, query = {}) {
-    const filters = { user: userId };
+  async listBudgets(userId: string, query: any = {}) {
+    const filters: any = { user: userId };
     if (query.month) {
       filters.month = query.month;
     }
@@ -20,7 +21,7 @@ class BudgetService {
     return this.budgetRepository.find(filters);
   }
 
-  async upsertBudget(userId, budgetData) {
+  async upsertBudget(userId: string, budgetData: any) {
     const { month, category = 'overall', amount, alertThreshold = 80 } = budgetData;
 
     if (!validateMonth(month)) {
@@ -47,9 +48,9 @@ class BudgetService {
     );
   }
 
-  async updateBudget(userId, budgetId, updateData) {
+  async updateBudget(userId: string, budgetId: string, updateData: any) {
     const { amount, alertThreshold } = updateData;
-    const update = {};
+    const update: any = {};
     if (amount) update.amount = Number(amount);
     if (alertThreshold) update.alertThreshold = Number(alertThreshold);
 
@@ -66,7 +67,7 @@ class BudgetService {
     return budget;
   }
 
-  async deleteBudget(userId, budgetId) {
+  async deleteBudget(userId: string, budgetId: string) {
     const budget = await this.budgetRepository.findOneAndDelete({
       _id: budgetId,
       user: userId,
@@ -80,4 +81,4 @@ class BudgetService {
   }
 }
 
-module.exports = new BudgetService(budgetRepository);
+export default new BudgetService(budgetRepository);

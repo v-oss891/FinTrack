@@ -1,25 +1,26 @@
-const jwt = require('jsonwebtoken');
-const userRepository = require('../repositories/UserRepository');
-const env = require('../config/env');
-const AppError = require('../utils/AppError');
-const { validateEmail } = require('../utils/validators');
+import jwt from 'jsonwebtoken';
+import userRepository from '../repositories/UserRepository';
+import env from '../config/env';
+import AppError from '../utils/AppError';
+import { validateEmail } from '../utils/validators';
 
 /**
  * Service for handling authentication logic.
- * Delegating DB operations to UserRepository.
  */
 class AuthService {
-  constructor(userRepository) {
-    this.userRepository = userRepository;
+  private userRepository;
+
+  constructor(userRepo: any) {
+    this.userRepository = userRepo;
   }
 
-  signToken(id) {
-    return jwt.sign({ id }, env.jwtSecret, {
+  signToken(id: string) {
+    return jwt.sign({ id }, env.jwtSecret as string, {
       expiresIn: env.jwtExpiresIn,
     });
   }
 
-  sanitizeUser(user) {
+  sanitizeUser(user: any) {
     return {
       id: user._id,
       name: user.name,
@@ -28,7 +29,7 @@ class AuthService {
     };
   }
 
-  async register(userData) {
+  async register(userData: any) {
     const { name, email, password } = userData;
 
     if (!name || name.trim().length < 2) {
@@ -62,7 +63,7 @@ class AuthService {
     };
   }
 
-  async login(email, password) {
+  async login(email: string, password: string) {
     if (!email || !password) {
       throw new AppError('Email and password are required.', 400);
     }
@@ -82,4 +83,4 @@ class AuthService {
   }
 }
 
-module.exports = new AuthService(userRepository);
+export default new AuthService(userRepository);

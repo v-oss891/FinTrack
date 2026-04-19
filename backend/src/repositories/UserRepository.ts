@@ -1,11 +1,10 @@
-const User = require('../models/User');
+import User from '../models/User';
 
 /**
  * Repository for User database operations.
- * Responsibility: Direct interaction with the User model.
  */
 class UserRepository {
-  async findByEmail(email, selectPassword = false) {
+  async findByEmail(email: string, selectPassword = false) {
     const query = User.findOne({ email: email.toLowerCase().trim() });
     if (selectPassword) {
       query.select('+password');
@@ -13,13 +12,13 @@ class UserRepository {
     return query;
   }
 
-  async findById(id) {
+  async findById(id: string) {
     return User.findById(id);
   }
 
-  async create(userData) {
+  async create(userData: any) {
     return User.create(userData);
   }
 }
 
-module.exports = new UserRepository();
+export default new UserRepository();

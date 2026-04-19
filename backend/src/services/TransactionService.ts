@@ -1,18 +1,19 @@
-const transactionRepository = require('../repositories/TransactionRepository');
-const AppError = require('../utils/AppError');
-const { ensureValidTransactionPayload } = require('../utils/validators');
+import transactionRepository from '../repositories/TransactionRepository';
+import AppError from '../utils/AppError';
+import { ensureValidTransactionPayload } from '../utils/validators';
 
 /**
  * Service for managing transaction business logic.
- * Delegating DB operations to TransactionRepository.
  */
 class TransactionService {
-  constructor(transactionRepository) {
-    this.transactionRepository = transactionRepository;
+  private transactionRepository;
+
+  constructor(transactionRepo: any) {
+    this.transactionRepository = transactionRepo;
   }
 
-  buildFilters(userId, query) {
-    const filters = { user: userId };
+  buildFilters(userId: string, query: any) {
+    const filters: any = { user: userId };
 
     if (query.type) {
       filters.type = query.type;
@@ -39,7 +40,7 @@ class TransactionService {
     return filters;
   }
 
-  async listTransactions(userId, query) {
+  async listTransactions(userId: string, query: any) {
     const page = Math.max(Number(query.page) || 1, 1);
     const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
     const filters = this.buildFilters(userId, query);
@@ -60,7 +61,7 @@ class TransactionService {
     };
   }
 
-  async getTransaction(userId, transactionId) {
+  async getTransaction(userId: string, transactionId: string) {
     const transaction = await this.transactionRepository.findOne({
       _id: transactionId,
       user: userId,
@@ -73,7 +74,7 @@ class TransactionService {
     return transaction;
   }
 
-  async createTransaction(userId, transactionData) {
+  async createTransaction(userId: string, transactionData: any) {
     ensureValidTransactionPayload(transactionData);
 
     return this.transactionRepository.create({
@@ -88,7 +89,7 @@ class TransactionService {
     });
   }
 
-  async updateTransaction(userId, transactionId, transactionData) {
+  async updateTransaction(userId: string, transactionId: string, transactionData: any) {
     ensureValidTransactionPayload(transactionData);
 
     const transaction = await this.transactionRepository.findOneAndUpdate(
@@ -111,7 +112,7 @@ class TransactionService {
     return transaction;
   }
 
-  async deleteTransaction(userId, transactionId) {
+  async deleteTransaction(userId: string, transactionId: string) {
     const transaction = await this.transactionRepository.findOneAndDelete({
       _id: transactionId,
       user: userId,
@@ -124,10 +125,10 @@ class TransactionService {
     return transaction;
   }
 
-  async getAllForExport(userId, query) {
+  async getAllForExport(userId: string, query: any) {
     const filters = this.buildFilters(userId, query);
     return this.transactionRepository.findAll(filters);
   }
 }
 
-module.exports = new TransactionService(transactionRepository);
+export default new TransactionService(transactionRepository);

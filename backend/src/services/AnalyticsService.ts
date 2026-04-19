@@ -1,23 +1,25 @@
-const mongoose = require('mongoose');
-const budgetRepository = require('../repositories/BudgetRepository');
-const transactionRepository = require('../repositories/TransactionRepository');
-const { getMonthKey, getMonthRange } = require('../utils/date');
+import mongoose from 'mongoose';
+import budgetRepository from '../repositories/BudgetRepository';
+import transactionRepository from '../repositories/TransactionRepository';
+import { getMonthKey, getMonthRange } from '../utils/date';
 
 /**
  * Service for handling complex analytics and data summaries.
- * Delegating DB operations to BudgetRepository and TransactionRepository.
  */
 class AnalyticsService {
-  constructor(budgetRepository, transactionRepository) {
-    this.budgetRepository = budgetRepository;
-    this.transactionRepository = transactionRepository;
+  private budgetRepository;
+  private transactionRepository;
+
+  constructor(budgetRepo: any, transactionRepo: any) {
+    this.budgetRepository = budgetRepo;
+    this.transactionRepository = transactionRepo;
   }
 
-  toObjectId(id) {
+  toObjectId(id: string) {
     return new mongoose.Types.ObjectId(id);
   }
 
-  buildSummary(totals = []) {
+  buildSummary(totals: any[] = []) {
     return totals.reduce(
       (acc, item) => {
         acc[item._id] = item.total;
@@ -27,7 +29,7 @@ class AnalyticsService {
     );
   }
 
-  async getBudgetProgress(userId, month) {
+  async getBudgetProgress(userId: string, month: string) {
     const budgets = await this.budgetRepository.find({ user: userId, month });
 
     if (!budgets.length) {
@@ -51,14 +53,14 @@ class AnalyticsService {
       },
     ]);
 
-    const spendingMap = spending.reduce((acc, item) => {
+    const spendingMap = spending.reduce((acc: any, item: any) => {
       acc[item._id] = item.spent;
       return acc;
     }, {});
 
-    const overallSpent = spending.reduce((sum, item) => sum + item.spent, 0);
+    const overallSpent = spending.reduce((sum: number, item: any) => sum + item.spent, 0);
 
-    return budgets.map((budget) => {
+    return budgets.map((budget: any) => {
       const spent = budget.category === 'overall' ? overallSpent : spendingMap[budget.category] || 0;
       const percentage = budget.amount ? Number(((spent / budget.amount) * 100).toFixed(1)) : 0;
       const status = percentage >= 100 ? 'exceeded' : percentage >= budget.alertThreshold ? 'warning' : 'healthy';
@@ -73,7 +75,7 @@ class AnalyticsService {
     });
   }
 
-  async getDashboard(userId, month = getMonthKey(new Date())) {
+  async getDashboard(userId: string, month = getMonthKey(new Date())) {
     const { startDate, endDate } = getMonthRange(month);
 
     const [allTimeTotals, monthTotals, recentTransactions, budgetProgress] = await Promise.all([
@@ -97,8 +99,8 @@ class AnalyticsService {
     const allTime = this.buildSummary(allTimeTotals);
     const monthSummary = this.buildSummary(monthTotals);
     const notifications = budgetProgress
-      .filter((item) => item.status !== 'healthy')
-      .map((item) => ({
+      .filter((item: any) => item.status !== 'healthy')
+      .map((item: any) => ({
         id: `${item.month}-${item.category}`,
         type: item.status === 'exceeded' ? 'error' : 'warning',
         message:
@@ -119,7 +121,7 @@ class AnalyticsService {
     };
   }
 
-  async getAnalytics(userId, year) {
+  async getAnalytics(userId: string, year: number) {
     const yearStart = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
     const yearEnd = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
 
@@ -165,7 +167,7 @@ class AnalyticsService {
       monthMap.set(month, { month, income: 0, expense: 0 });
     }
 
-    monthly.forEach((item) => {
+    monthly.forEach((item: any) => {
       const entry = monthMap.get(item._id.month);
       entry[item._id.type] = Number(item.total.toFixed(2));
     });
@@ -184,19 +186,19 @@ class AnalyticsService {
         savingsRate,
       },
       monthlyReport,
-      categoryInsights: categories.map((item) => ({
+      categoryInsights: categories.map((item: any) => ({
         category: item._id,
         amount: Number(item.total.toFixed(2)),
       })),
     };
   }
 
-  async getInsights(userId, month = getMonthKey(new Date())) {
+  async getInsights(userId: string, month = getMonthKey(new Date())) {
     const dashboard = await this.getDashboard(userId, month);
     const analytics = await this.getAnalytics(userId, Number(month.split('-')[0]));
 
     const largestCategory = analytics.categoryInsights[0];
-    const insights = [];
+    const insights: string[] = [];
 
     if (dashboard.monthExpense > dashboard.monthIncome) {
       insights.push('Expenses are higher than income this month. Consider reducing discretionary spending.');
@@ -209,7 +211,7 @@ class AnalyticsService {
       insights.push(`${largestCategory.category} is your biggest expense category this year.`);
     }
 
-    const exceededBudget = dashboard.budgetProgress.find((item) => item.status === 'exceeded');
+    const exceededBudget = dashboard.budgetProgress.find((item: any) => item.status === 'exceeded');
     if (exceededBudget) {
       insights.push(`Your ${exceededBudget.category} budget has been exceeded. Tighten spending in that category.`);
     }
@@ -222,4 +224,4 @@ class AnalyticsService {
   }
 }
 
-module.exports = new AnalyticsService(budgetRepository, transactionRepository);
+export default new AnalyticsService(budgetRepository, transactionRepository);
