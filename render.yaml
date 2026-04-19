@@ -27,8 +27,9 @@ services:
       - key: CLIENT_URL
         sync: false            # set via dashboard, e.g. https://fintrack-web.onrender.com
 
-  - type: static_site
+  - type: web
     name: fintrack-web
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./build
