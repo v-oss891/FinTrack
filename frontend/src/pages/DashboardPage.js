@@ -52,7 +52,7 @@ const DashboardPage = () => {
             <div className="panel">
               <h3 className="panel-title">Budget Alerts</h3>
               <p className="panel-subtitle">Warnings appear automatically as budgets fill up.</p>
-              {dashboard.notifications.length ? (
+{dashboard.notifications?.length ? (
                 dashboard.notifications.map((item) => (
                   <div key={item.id} className={`alert ${item.type}`}>
                     {item.message}
@@ -67,7 +67,7 @@ const DashboardPage = () => {
               <h3 className="panel-title">AI Spending Insights</h3>
               <p className="panel-subtitle">Rule-based suggestions derived from your trends.</p>
               <ul className="insight-list">
-                {dashboard.insights.map((insight) => (
+{dashboard.insights?.map((insight) => (
                   <li key={insight}>{insight}</li>
                 ))}
               </ul>
@@ -78,7 +78,7 @@ const DashboardPage = () => {
             <div className="panel">
               <h3 className="panel-title">Budget Progress</h3>
               <p className="panel-subtitle">Track every limit against actual spending.</p>
-              {dashboard.budgetProgress.length ? (
+{dashboard.budgetProgress?.length ? (
                 <ul className="budget-list">
                   {dashboard.budgetProgress.map((budget) => (
                     <li key={`${budget.month}-${budget.category}`} className="budget-item">
