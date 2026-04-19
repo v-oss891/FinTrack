@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import TransactionFilters from '../components/TransactionFilters';
 import TransactionForm from '../components/TransactionForm';
@@ -20,6 +21,7 @@ const TransactionsPage = () => {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
   const editingTransactionId = editingTransaction?._id;
 
   const loadTransactions = useCallback(async () => {
@@ -31,6 +33,19 @@ const TransactionsPage = () => {
       setTransactions([]);
     }
   }, [filters]);
+
+  // If arrived from Dashboard with ?edit=<id>, open that transaction in the form
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (!editId || !transactions.length) return;
+    const target = transactions.find((t) => (t._id || t.id) === editId);
+    if (target) {
+      setEditingTransaction(target);
+      setFeedback('Editing transaction from dashboard.');
+      searchParams.delete('edit');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, transactions, setSearchParams]);
 
   const handleDelete = useCallback(async (id) => {
     try {

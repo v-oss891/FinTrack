@@ -127,8 +127,11 @@ const TransactionForm = ({ onSubmit, onCancel, saving }) => {
                 className="form-select"
               >
                 <option value="bank_transfer">Bank Transfer</option>
-                <option value="credit_card">Credit Card</option>
+                <option value="card">Card</option>
                 <option value="cash">Cash</option>
+                <option value="upi">UPI</option>
+                <option value="wallet">Wallet</option>
+                <option value="other">Other</option>
               </select>
             </div>
           </div>

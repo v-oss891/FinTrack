@@ -1,0 +1,43 @@
+# Render Blueprint — deploy both services with one click.
+# https://render.com/docs/blueprint-spec
+#
+# After importing this file via Render -> "New" -> "Blueprint":
+#   1. Set MONGODB_URI + JWT_SECRET in the backend service's "Environment" tab.
+#   2. Set REACT_APP_API_URL on the frontend = the backend's onrender.com URL.
+#   3. Set CLIENT_URL on the backend = the frontend's onrender.com URL.
+
+services:
+  - type: web
+    name: fintrack-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MONGODB_URI
+        sync: false            # set via dashboard
+      - key: JWT_SECRET
+        sync: false            # set via dashboard
+      - key: CLIENT_URL
+        sync: false            # set via dashboard, e.g. https://fintrack-web.onrender.com
+
+  - type: web
+    name: fintrack-web
+    runtime: static
+    rootDir: frontend
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false            # set to the fintrack-api URL after first deploy
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import StatCard from '../components/StatCard';
 import TransactionTable from '../components/TransactionTable';
@@ -9,6 +9,8 @@ import { formatCurrency, getMonthValue } from '../utils';
 const DashboardPage = () => {
   const [dashboard, setDashboard] = useState(null);
   const [month, setMonth] = useState(getMonthValue());
+  const [feedback, setFeedback] = useState('');
+  const navigate = useNavigate();
 
   const loadDashboard = useCallback(async () => {
     const [dashboardResponse, insightsResponse] = await Promise.all([
@@ -26,6 +28,18 @@ const DashboardPage = () => {
     loadDashboard();
   }, [loadDashboard]);
 
+  const handleDelete = async (id) => {
+    // eslint-disable-next-line no-alert, no-restricted-globals
+    if (!confirm('Are you sure you want to delete this transaction?')) return;
+    try {
+      await api.delete(`/transactions/${id}`);
+      setFeedback('Transaction deleted.');
+      await loadDashboard();
+    } catch (error) {
+      setFeedback(error.response?.data?.message || 'Unable to delete transaction.');
+    }
+  };
+
   return (
     <AppLayout
       title="Dashboard"
@@ -41,6 +55,7 @@ const DashboardPage = () => {
         <div className="loading-screen">Loading dashboard data...</div>
       ) : (
         <div className="grid">
+          {feedback ? <div className="alert warning">{feedback}</div> : null}
           <div className="grid stats-grid">
             <StatCard label="Total Balance" value={dashboard.totalBalance} tone="var(--primary)" />
             <StatCard label="Month Income" value={dashboard.monthIncome} tone="#89ffd4" />
@@ -105,15 +120,10 @@ const DashboardPage = () => {
                 <TransactionTable
                 transactions={dashboard.recentTransactions}
                 onEdit={(transaction) => {
-                  window.location.href = `/transactions?edit=${transaction._id || transaction.id}`;
+                  navigate(`/transactions?edit=${transaction._id || transaction.id}`);
                 }}
 
-                onDelete={(id) => {
-                  // eslint-disable-next-line no-alert, no-restricted-globals
-                  if (confirm('Are you sure you want to delete this transaction?')) {
-                    window.location.href = `/transactions?delete=${id}`;
-                  }
-                }}
+                onDelete={handleDelete}
 
               />
             </div>

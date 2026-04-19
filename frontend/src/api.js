@@ -1,9 +1,18 @@
 import axios from 'axios';
 
-export const apiBaseUrl = process.env.REACT_APP_API_URL || '/api';
+// Build a clean API base URL.
+// - Trim whitespace (guards against trailing spaces in .env on Render/Vercel)
+// - Strip any trailing slashes
+// - Ensure exactly one "/api" suffix
+const rawBase = (process.env.REACT_APP_API_URL || '').trim().replace(/\/+$/, '');
+const withApi = rawBase
+  ? (rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`)
+  : '/api'; // dev fallback uses CRA proxy to localhost:8000
+
+export const apiBaseUrl = withApi;
 
 const api = axios.create({
-  baseURL: apiBaseUrl + '/api',
+  baseURL: apiBaseUrl,
   timeout: 10000,
 });
 
