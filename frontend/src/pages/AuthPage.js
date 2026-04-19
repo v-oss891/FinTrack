@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../providers/AuthProvider';
-import api, { getApiErrorMessage } from '../api';
+import authService from '../services/AuthService';
+import apiService from '../services/ApiService';
 
 const AuthPage = () => {
   const { isAuthenticated, login, register } = useAuth();
@@ -17,7 +18,7 @@ const AuthPage = () => {
   useEffect(() => {
     const checkApiStatus = async () => {
       try {
-        await api.get('/health');
+        await authService.checkHealth();
         setApiStatus({ checking: false, healthy: true });
       } catch (healthError) {
         setApiStatus({ checking: false, healthy: false });
@@ -46,7 +47,7 @@ const AuthPage = () => {
         await register(payload);
       }
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
+      setError(apiService.getErrorMessage(requestError));
     } finally {
       setSaving(false);
     }

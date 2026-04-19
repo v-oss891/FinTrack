@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import api from '../api';
+import authService from '../services/AuthService';
 
 const AuthContext = createContext(null);
 
+/**
+ * Provider for authentication state and methods.
+ * Now utilizes AuthService (OOP Service Layer).
+ */
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('fintrack_token'));
   const [user, setUser] = useState(null);
@@ -16,8 +20,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await api.get('/users/me');
-        setUser(response.data.data);
+        const userData = await authService.getProfile();
+        setUser(userData);
       } catch (error) {
         localStorage.removeItem('fintrack_token');
         setToken(null);
@@ -30,22 +34,22 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (payload) => {
-    const response = await api.post('/auth/login', payload);
-    localStorage.setItem('fintrack_token', response.data.token);
-    setToken(response.data.token);
-    setUser(response.data.user);
+    const data = await authService.login(payload);
+    localStorage.setItem('fintrack_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
   };
 
   const register = async (payload) => {
-    const response = await api.post('/auth/register', payload);
-    localStorage.setItem('fintrack_token', response.data.token);
-    setToken(response.data.token);
-    setUser(response.data.user);
+    const data = await authService.register(payload);
+    localStorage.setItem('fintrack_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
   };
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await authService.logout();
     } catch (error) {
       // Client-side logout should still succeed.
     } finally {

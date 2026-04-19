@@ -4,8 +4,8 @@ import AppLayout from '../components/AppLayout';
 import TransactionFilters from '../components/TransactionFilters';
 import TransactionForm from '../components/TransactionForm';
 import TransactionTable from '../components/TransactionTable';
-import api from '../api';
-import { getApiErrorMessage } from '../api';
+import transactionService from '../services/TransactionService';
+import apiService from '../services/ApiService';
 
 const emptyFilters = {
   search: '',
@@ -26,15 +26,14 @@ const TransactionsPage = () => {
 
   const loadTransactions = useCallback(async () => {
     try {
-      const response = await api.get('/transactions', { params: filters });
-      setTransactions(response.data.data);
+      const data = await transactionService.getTransactions(filters);
+      setTransactions(data.data);
     } catch (error) {
-      setFeedback(getApiErrorMessage(error));
+      setFeedback(apiService.getErrorMessage(error));
       setTransactions([]);
     }
   }, [filters]);
 
-  // If arrived from Dashboard with ?edit=<id>, open that transaction in the form
   useEffect(() => {
     const editId = searchParams.get('edit');
     if (!editId || !transactions.length) return;
@@ -49,14 +48,14 @@ const TransactionsPage = () => {
 
   const handleDelete = useCallback(async (id) => {
     try {
-      await api.delete(`/transactions/${id}`);
+      await transactionService.deleteTransaction(id);
       setFeedback('Transaction deleted.');
       if (editingTransactionId === id) {
         setEditingTransaction(null);
       }
       await loadTransactions();
     } catch (error) {
-      setFeedback(error.response?.data?.message || 'Unable to delete transaction.');
+      setFeedback('Unable to delete transaction.');
     }
   }, [editingTransactionId, loadTransactions]);
 
@@ -68,10 +67,10 @@ const TransactionsPage = () => {
     setSaving(true);
     try {
       if (editingTransaction?._id) {
-        await api.put(`/transactions/${editingTransaction._id}`, payload);
+        await transactionService.updateTransaction(editingTransaction._id, payload);
         setFeedback('Transaction updated successfully.');
       } else {
-        await api.post('/transactions', payload);
+        await transactionService.createTransaction(payload);
         setFeedback('Transaction added successfully.');
       }
       setEditingTransaction(null);
@@ -81,7 +80,7 @@ const TransactionsPage = () => {
         setEditingTransaction(null);
         setFeedback('The transaction you were editing no longer exists. The form has been reset.');
       } else {
-        setFeedback(error.response?.data?.message || 'Unable to save transaction.');
+        setFeedback(apiService.getErrorMessage(error));
       }
     } finally {
       setSaving(false);
@@ -94,18 +93,23 @@ const TransactionsPage = () => {
   };
 
   const handleExport = async () => {
-    const response = await api.get('/transactions/export/csv', {
-      params: filters,
-      responseType: 'blob',
-    });
+    try {
+      // Use raw fetch or blob for download
+      const response = await apiService.get('/transactions/export/csv', {
+        params: filters,
+        responseType: 'blob',
+      });
 
-    const blob = new Blob([response.data], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'transactions-export.csv';
-    link.click();
-    window.URL.revokeObjectURL(url);
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'transactions-export.csv';
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      setFeedback('Unable to export transactions.');
+    }
   };
 
   return (
@@ -115,7 +119,7 @@ const TransactionsPage = () => {
       actions={<button type="button" className="button" onClick={loadTransactions}>Refresh List</button>}
     >
       <div className="grid">
-        {feedback ? <div className="alert warning">{feedback}</div> : null}
+        {feedback ? <div className={`alert ${feedback.includes('success') || feedback.includes('deleted') ? 'success' : 'warning'}`}>{feedback}</div> : null}
 
         <TransactionFilters
           filters={filters}

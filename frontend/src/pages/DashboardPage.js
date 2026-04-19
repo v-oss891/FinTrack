@@ -3,9 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import StatCard from '../components/StatCard';
 import TransactionTable from '../components/TransactionTable';
-import api from '../api';
+import budgetService from '../services/BudgetService';
+import transactionService from '../services/TransactionService';
 import { formatCurrency, getMonthValue } from '../utils';
 
+/**
+ * Dashboard Page - UI only concern.
+ * Logic is delegated to BudgetService and TransactionService.
+ */
 const DashboardPage = () => {
   const [dashboard, setDashboard] = useState(null);
   const [month, setMonth] = useState(getMonthValue());
@@ -13,15 +18,19 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   const loadDashboard = useCallback(async () => {
-    const [dashboardResponse, insightsResponse] = await Promise.all([
-      api.get('/users/dashboard', { params: { month } }),
-      api.get('/users/insights', { params: { month } }),
-    ]);
+    try {
+      const [dashboardData, insightsData] = await Promise.all([
+        budgetService.getDashboard(month),
+        budgetService.getInsights(month),
+      ]);
 
-    setDashboard({
-      ...dashboardResponse.data.data,
-      insights: insightsResponse.data.data,
-    });
+      setDashboard({
+        ...dashboardData,
+        insights: insightsData,
+      });
+    } catch (error) {
+      setFeedback('Unable to load dashboard data.');
+    }
   }, [month]);
 
   useEffect(() => {
@@ -32,11 +41,11 @@ const DashboardPage = () => {
     // eslint-disable-next-line no-alert, no-restricted-globals
     if (!confirm('Are you sure you want to delete this transaction?')) return;
     try {
-      await api.delete(`/transactions/${id}`);
+      await transactionService.deleteTransaction(id);
       setFeedback('Transaction deleted.');
       await loadDashboard();
     } catch (error) {
-      setFeedback(error.response?.data?.message || 'Unable to delete transaction.');
+      setFeedback('Unable to delete transaction.');
     }
   };
 
@@ -55,7 +64,7 @@ const DashboardPage = () => {
         <div className="loading-screen">Loading dashboard data...</div>
       ) : (
         <div className="grid">
-          {feedback ? <div className="alert warning">{feedback}</div> : null}
+          {feedback ? <div className={`alert ${feedback.includes('deleted') ? 'success' : 'warning'}`}>{feedback}</div> : null}
           <div className="grid stats-grid">
             <StatCard label="Total Balance" value={dashboard.totalBalance} tone="var(--primary)" />
             <StatCard label="Month Income" value={dashboard.monthIncome} tone="#89ffd4" />
@@ -67,7 +76,7 @@ const DashboardPage = () => {
             <div className="panel">
               <h3 className="panel-title">Budget Alerts</h3>
               <p className="panel-subtitle">Warnings appear automatically as budgets fill up.</p>
-{dashboard.notifications?.length ? (
+              {dashboard.notifications?.length ? (
                 dashboard.notifications.map((item) => (
                   <div key={item.id} className={`alert ${item.type}`}>
                     {item.message}
@@ -82,7 +91,7 @@ const DashboardPage = () => {
               <h3 className="panel-title">AI Spending Insights</h3>
               <p className="panel-subtitle">Rule-based suggestions derived from your trends.</p>
               <ul className="insight-list">
-{dashboard.insights?.map((insight) => (
+                {dashboard.insights?.map((insight) => (
                   <li key={insight}>{insight}</li>
                 ))}
               </ul>
@@ -93,7 +102,7 @@ const DashboardPage = () => {
             <div className="panel">
               <h3 className="panel-title">Budget Progress</h3>
               <p className="panel-subtitle">Track every limit against actual spending.</p>
-{dashboard.budgetProgress?.length ? (
+              {dashboard.budgetProgress?.length ? (
                 <ul className="budget-list">
                   {dashboard.budgetProgress.map((budget) => (
                     <li key={`${budget.month}-${budget.category}`} className="budget-item">
@@ -117,14 +126,12 @@ const DashboardPage = () => {
             <div className="panel">
               <h3 className="panel-title">Recent Transactions</h3>
               <p className="panel-subtitle">Your six most recent financial events.</p>
-                <TransactionTable
+              <TransactionTable
                 transactions={dashboard.recentTransactions}
                 onEdit={(transaction) => {
                   navigate(`/transactions?edit=${transaction._id || transaction.id}`);
                 }}
-
                 onDelete={handleDelete}
-
               />
             </div>
           </div>

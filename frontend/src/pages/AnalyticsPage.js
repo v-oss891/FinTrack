@@ -3,15 +3,19 @@ import AppLayout from '../components/AppLayout';
 import IncomeExpenseChart from '../components/charts/IncomeExpenseChart';
 import CategoryPieChart from '../components/charts/CategoryPieChart';
 import StatCard from '../components/StatCard';
-import api from '../api';
+import budgetService from '../services/BudgetService';
 
 const AnalyticsPage = () => {
   const [year, setYear] = useState(new Date().getFullYear());
   const [analytics, setAnalytics] = useState(null);
 
   const loadAnalytics = useCallback(async () => {
-    const response = await api.get('/users/analytics', { params: { year } });
-    setAnalytics(response.data.data);
+    try {
+      const data = await budgetService.getAnalytics(year);
+      setAnalytics(data);
+    } catch (error) {
+      console.error('Failed to load analytics', error);
+    }
   }, [year]);
 
   useEffect(() => {
